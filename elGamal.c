@@ -19,12 +19,6 @@ typedef struct
 
 void key_gen(pk *pk)
 {
-  gmp_printf ("%s \n", "here");
-
-  //pk *pk;
-
-  gmp_printf ("%s is an mpz\n", "here");
-  gmp_printf ("%s is an mpz %Zd\n", "here", pk->p);
 
   mpz_t p;
   mpz_init (pk->p);
@@ -33,8 +27,9 @@ void key_gen(pk *pk)
   mpz_set_ui(pk->p, 6883);
   mpz_set_ui(pk->g, 4344);
   gmp_printf ("%s is an mpz %Zd\n", "here", pk->p);
+  gmp_printf ("%s is an mpz %Zd\n", "here", pk->g);
 
-  gmp_printf ("%s\n", "here");
+
 
   gmp_randstate_t state;
   mpz_t n;
@@ -47,6 +42,8 @@ void key_gen(pk *pk)
 
 
   mpz_powm_sec(pk->y, pk->g, res, pk->p);
+  gmp_printf ("%s is an mpz %Zd\n", "here", res);
+
   gmp_printf ("%s is an mpz %Zd\n", "here", pk->y);
 
 
@@ -55,8 +52,6 @@ void key_gen(pk *pk)
   mpz_clear(res);
   mpz_clear(pk->p);
   mpz_clear(pk->y);
-
-
 }
 
 int main()
