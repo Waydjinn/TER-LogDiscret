@@ -17,18 +17,24 @@ typedef struct
   mpz_t x;	    /* exposant secret */
 } sk;
 
-void key_gen(pk *pk;)
+void key_gen(pk *pk)
 {
-  gmp_printf ("%s is an mpz\n", "here");
+  gmp_printf ("%s \n", "here");
 
   //pk *pk;
 
   gmp_printf ("%s is an mpz\n", "here");
+  gmp_printf ("%s is an mpz %Zd\n", "here", pk->p);
 
-  mpz_set_ui(pk pk.p, 6883);
+  mpz_t p;
+  mpz_init (pk->p);
+  mpz_t g;
+  mpz_init (pk->g);
+  mpz_set_ui(pk->p, 6883);
   mpz_set_ui(pk->g, 4344);
+  gmp_printf ("%s is an mpz %Zd\n", "here", pk->p);
 
-  gmp_printf ("%s is an mpz\n", "here");
+  gmp_printf ("%s\n", "here");
 
   gmp_randstate_t state;
   mpz_t n;
@@ -55,7 +61,8 @@ void key_gen(pk *pk;)
 
 int main()
 {
-  key_gen();
+  pk pk;
+  key_gen(&pk);
 
   return 0;
 }
