@@ -19,7 +19,18 @@ typedef struct
 
 void key_gen()
 {
-  
+  gmp_randstate_t state;
+  mpz_t n;
+  mpz_init(n);
+  mpz_t res;
+  mpz_init(res);
+  mpz_set_ui(n, 10);
+  gmp_randinit_default (state);
+  mpz_urandomm (res, state, n);
+
+  mpz_clear(n);
+
+
 }
 
 int main()
