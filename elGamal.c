@@ -25,15 +25,14 @@ void key_gen(pk *pk)
   mpz_init (pk->p);
   mpz_t g;
   mpz_init (pk->g);
-  mpz_set_ui(pk->p, 6883);
-  mpz_set_ui(pk->g, 4344);
+  mpz_set_ui(pk->p, 71);
+  mpz_set_ui(pk->g, 33);
   mpz_t n;
   mpz_init(n);
   mpz_t res;
   mpz_init(res);
   mpz_t y;
   mpz_init(pk->y);
-
   mpz_set(n, pk->p);
 
   gmp_printf ("%s %Zd\n", "p =", pk->p);
@@ -46,8 +45,8 @@ void key_gen(pk *pk)
   gmp_randseed_ui(state, seed);
   mpz_urandomm (res, state, n);
   mpz_powm_sec(pk->y, pk->g, res, pk->p);
-  gmp_printf ("%s %Zd\n", "res =", res);
 
+  gmp_printf ("%s %Zd\n", "res =", res);
   gmp_printf ("%s %Zd\n", "g^x mod p =", pk->y);
 
 
@@ -60,6 +59,11 @@ void key_gen(pk *pk)
   mpz_clear(pk->p);
   mpz_clear(pk->y);
 
+}
+
+void encryption()
+{
+  
 }
 
 int main()
