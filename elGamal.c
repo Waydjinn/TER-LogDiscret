@@ -20,44 +20,41 @@ typedef struct
 
 void key_gen(pk *pk)
 {
-
+/////////initialisation////////
   mpz_t p;
   mpz_init (pk->p);
   mpz_t g;
   mpz_init (pk->g);
   mpz_set_ui(pk->p, 6883);
   mpz_set_ui(pk->g, 4344);
-  gmp_printf ("%s is an mpz %Zd\n", "here", pk->p);
-  gmp_printf ("%s is an mpz %Zd\n", "here", pk->g);
-  mpz_t seed;
-  seed = time(NULL);
-  gmp_printf ("%s is an mpz\n", "here");
-
-
-  gmp_randstate_t state;
-  mpz_init(seed);
-  gmp_printf ("%s is an mpz\n", "here");
-  //gmp_randseed(state, seed);
-  gmp_printf ("%s is an mpz\n", "here");
-
   mpz_t n;
   mpz_init(n);
   mpz_t res;
   mpz_init(res);
-  mpz_set(n, pk->p);
-  gmp_randinit_default (state);
-
-  mpz_urandomm (res, state, n);
-
   mpz_t y;
   mpz_init(pk->y);
 
+  mpz_set(n, pk->p);
+
+  gmp_printf ("%s is an mpz %Zd\n", "here", pk->p);
+  gmp_printf ("%s is an mpz %Zd\n", "here", pk->g);
+
+///////Debut tentative random
+  //mpz_t seed;
+  unsigned long int seed = time(NULL);
+  gmp_randstate_t state;
+  gmp_randinit_default (state);
+  //mpz_init(seed);
+  gmp_randseed_ui(state, seed);
+  mpz_urandomm (res, state, n);
   mpz_powm_sec(pk->y, pk->g, res, pk->p);
   gmp_printf ("%s is an mpz %Zd\n", "here", res);
 
   gmp_printf ("%s is an mpz %Zd\n", "here", pk->y);
 
-  mpz_clear(seed);
+
+
+  //mpz_clear(seed);
   mpz_clear(n);
   mpz_clear(pk->g);
   gmp_randclear(state);
