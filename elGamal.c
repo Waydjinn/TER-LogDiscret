@@ -1,5 +1,6 @@
 #include <gmp.h>
 #include <stdio.h>
+#include <time.h>
 
 typedef struct
 {
@@ -28,30 +29,42 @@ void key_gen(pk *pk)
   mpz_set_ui(pk->g, 4344);
   gmp_printf ("%s is an mpz %Zd\n", "here", pk->p);
   gmp_printf ("%s is an mpz %Zd\n", "here", pk->g);
-
+  mpz_t seed;
+  seed = time(NULL);
+  gmp_printf ("%s is an mpz\n", "here");
 
 
   gmp_randstate_t state;
+  mpz_init(seed);
+  gmp_printf ("%s is an mpz\n", "here");
+  //gmp_randseed(state, seed);
+  gmp_printf ("%s is an mpz\n", "here");
+
   mpz_t n;
   mpz_init(n);
   mpz_t res;
   mpz_init(res);
   mpz_set(n, pk->p);
   gmp_randinit_default (state);
+
   mpz_urandomm (res, state, n);
 
+  mpz_t y;
+  mpz_init(pk->y);
 
   mpz_powm_sec(pk->y, pk->g, res, pk->p);
   gmp_printf ("%s is an mpz %Zd\n", "here", res);
 
   gmp_printf ("%s is an mpz %Zd\n", "here", pk->y);
 
-
+  mpz_clear(seed);
   mpz_clear(n);
   mpz_clear(pk->g);
+  gmp_randclear(state);
   mpz_clear(res);
   mpz_clear(pk->p);
   mpz_clear(pk->y);
+
 }
 
 int main()
