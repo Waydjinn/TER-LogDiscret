@@ -36,21 +36,19 @@ void key_gen(pk *pk)
 
   mpz_set(n, pk->p);
 
-  gmp_printf ("%s is an mpz %Zd\n", "here", pk->p);
-  gmp_printf ("%s is an mpz %Zd\n", "here", pk->g);
+  gmp_printf ("%s %Zd\n", "p =", pk->p);
+  gmp_printf ("%s %Zd\n", "g =", pk->g);
 
-///////Debut tentative random
-  //mpz_t seed;
+///////Debut random
   unsigned long int seed = time(NULL);
   gmp_randstate_t state;
   gmp_randinit_default (state);
-  //mpz_init(seed);
   gmp_randseed_ui(state, seed);
   mpz_urandomm (res, state, n);
   mpz_powm_sec(pk->y, pk->g, res, pk->p);
-  gmp_printf ("%s is an mpz %Zd\n", "here", res);
+  gmp_printf ("%s %Zd\n", "res =", res);
 
-  gmp_printf ("%s is an mpz %Zd\n", "here", pk->y);
+  gmp_printf ("%s %Zd\n", "g^x mod p =", pk->y);
 
 
 
