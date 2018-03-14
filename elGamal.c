@@ -18,7 +18,7 @@ typedef struct
   mpz_t x;	    /* exposant secret */
 } sk;
 
-void key_gen(pk *pk)
+void key_gen(pk *pk, sk *sk)
 {
 /////////initialisation////////
   mpz_t p;
@@ -29,8 +29,8 @@ void key_gen(pk *pk)
   mpz_set_ui(pk->g, 33);
   mpz_t n;
   mpz_init(n);
-  mpz_t res;
-  mpz_init(res);
+  mpz_t x;
+  mpz_init(sk->x);
   mpz_t y;
   mpz_init(pk->y);
   mpz_set(n, pk->p);
@@ -43,10 +43,10 @@ void key_gen(pk *pk)
   gmp_randstate_t state;
   gmp_randinit_default (state);
   gmp_randseed_ui(state, seed);
-  mpz_urandomm (res, state, n);
-  mpz_powm_sec(pk->y, pk->g, res, pk->p);
+  mpz_urandomm (sk->x, state, n);
+  mpz_powm_sec(pk->y, pk->g, sk->x, pk->p);
 
-  gmp_printf ("%s %Zd\n", "res =", res);
+  gmp_printf ("%s %Zd\n", "res =", sk->x);
   gmp_printf ("%s %Zd\n", "g^x mod p =", pk->y);
 
 
@@ -55,7 +55,7 @@ void key_gen(pk *pk)
   mpz_clear(n);
   mpz_clear(pk->g);
   gmp_randclear(state);
-  mpz_clear(res);
+  mpz_clear(sk->x);
   mpz_clear(pk->p);
   mpz_clear(pk->y);
 
@@ -63,13 +63,14 @@ void key_gen(pk *pk)
 
 void encryption()
 {
-  
+
 }
 
 int main()
 {
   pk pk;
-  key_gen(&pk);
+  sk sk;
+  key_gen(&pk, &sk);
 
   return 0;
 }
