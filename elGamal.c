@@ -51,8 +51,6 @@ void key_gen(pk *pk, sk *sk, mpz_t p, mpz_t g, mpz_t h, mpz_t x)
 
 void encryption(pk *pk, sk *sk, C *C ,mpz_t p, mpz_t g, mpz_t h, mpz_t x, mpz_t m, mpz_t c1, mpz_t c2)
 {
-
-
   mpz_t y;
   mpz_init(y);
   mpz_t s;
@@ -71,7 +69,6 @@ void encryption(pk *pk, sk *sk, C *C ,mpz_t p, mpz_t g, mpz_t h, mpz_t x, mpz_t 
 
   gmp_printf ("%s %Zd\n", "g^xy", s);
   gmp_printf ("%s %Zd\n", "g^xy", tmp);
-
   gmp_printf ("%s %Zd\n", "g^xy", y);
 
   mpz_mul(C->c2, m, s);
@@ -87,8 +84,6 @@ void decryption(sk *sk, pk *pk, C *C, mpz_t p, mpz_t g, mpz_t h, mpz_t x, mpz_t 
   // Square And Multiply
 
   // Euclide Etendu
-
-
 
 }
 
@@ -115,7 +110,6 @@ int main()
   encryption(&pk, &sk,&C, pk.p, pk.g, pk.h, sk.x, m, C.c1, C.c2);
   decryption(&sk, &pk,&C, pk.p, pk.g, pk.h, sk.x, m, C.c1, C.c2);
   gmp_printf ("%s %Zd\n", "c2 v2 ", C.c2);
-
 
   mpz_clear(pk.g);
   mpz_clear(sk.x);
