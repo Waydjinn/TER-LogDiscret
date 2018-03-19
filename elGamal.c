@@ -49,7 +49,7 @@ void key_gen(pk *pk, sk *sk, mpz_t p, mpz_t g, mpz_t h, mpz_t x)
 
 }
 
-void encryption(pk *pk,sk *sk, C *C ,mpz_t p, mpz_t g, mpz_t h, mpz_t x, mpz_t m, mpz_t c1, mpz_t c2)
+void encryption(pk *pk, sk *sk, C *C ,mpz_t p, mpz_t g, mpz_t h, mpz_t x, mpz_t m, mpz_t c1, mpz_t c2)
 {
 
 
@@ -67,7 +67,7 @@ void encryption(pk *pk,sk *sk, C *C ,mpz_t p, mpz_t g, mpz_t h, mpz_t x, mpz_t m
 
   mpz_mul(tmp, sk->x, y); //tmp prend la valeur x*y
   mpz_powm_sec(C->c1, pk->g, y, pk->p); //c1 = g^y
-  mpz_powm_sec(s, pk->g, tmp, pk->p); 
+  mpz_powm_sec(s, pk->g, tmp, pk->p); //s = g^x*y
 
   gmp_printf ("%s %Zd\n", "g^xy", s);
   gmp_printf ("%s %Zd\n", "g^xy", tmp);
@@ -82,9 +82,33 @@ void encryption(pk *pk,sk *sk, C *C ,mpz_t p, mpz_t g, mpz_t h, mpz_t x, mpz_t m
 
 }
 
-void decryption()
+void decryption(sk *sk, pk *pk, C *C, mpz_t p, mpz_t g, mpz_t h, mpz_t x, mpz_t m, mpz_t c1, mpz_t c2)
 {
+  // Square And Multiply
+
+  // Euclide Etendu
+
+  mpz_t tmp;
+  mpz_init(tmp);
   mpz_t s;
+  mpz_init(s);
+  mpz_t e;
+  mpz_init(e);
+  mpz_set_si(e,-1);
+  mpz_t m_;
+  mpz_init(m_);
+
+  mpz_powm(s, C->c1,sk->x,pk->p);
+  mpz_powm(tmp, s, e, pk->p);
+  gmp_printf ("%s %Zd\n", "\n on affiche ", s);
+  gmp_printf ("%s %Zd\n", "\n on affiche ",tmp);
+
+  mpz_mul(m_, C->c2, tmp);
+  gmp_printf ("%s %Zd\n", "\n on affiche ", m_);
+
+
+
+
 }
 
 int main()
@@ -92,8 +116,12 @@ int main()
   pk pk;
   sk sk;
   C C;
-  mpz_t p,g,x,h,m,c1,c2;
+  mpz_t m;
+  gmp_printf ("%s %Zd\n", "juste p", pk.p);
+
   mpz_init (pk.p);
+  gmp_printf ("%s %Zd\n", "juste p", pk.p);
+
   mpz_init (pk.g);
   mpz_init(sk.x);
   mpz_init(pk.h);
@@ -102,10 +130,11 @@ int main()
   mpz_init(C.c1);
   mpz_init(C.c2);
 
-  key_gen(&pk, &sk, p, g, h, x);
-  encryption(&pk, &sk,&C, p, g, h, x, m, c1, c2);
-
+  key_gen(&pk, &sk, pk.p, pk.g, pk.h, sk.x);
+  encryption(&pk, &sk,&C, pk.p, pk.g, pk.h, sk.x, m, C.c1, C.c2);
+  decryption(&sk, &pk,&C, pk.p, pk.g, pk.h, sk.x, m, C.c1, C.c2);
   gmp_printf ("%s %Zd\n", "c2 v2 ", C.c2);
+
 
   mpz_clear(pk.g);
   mpz_clear(sk.x);
