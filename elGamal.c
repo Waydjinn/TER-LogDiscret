@@ -88,25 +88,6 @@ void decryption(sk *sk, pk *pk, C *C, mpz_t p, mpz_t g, mpz_t h, mpz_t x, mpz_t 
 
   // Euclide Etendu
 
-  mpz_t tmp;
-  mpz_init(tmp);
-  mpz_t s;
-  mpz_init(s);
-  mpz_t e;
-  mpz_init(e);
-  mpz_set_si(e,-1);
-  mpz_t m_;
-  mpz_init(m_);
-
-  mpz_powm(s, C->c1,sk->x,pk->p);
-  mpz_powm(tmp, s, e, pk->p);
-  gmp_printf ("%s %Zd\n", "\n on affiche ", s);
-  gmp_printf ("%s %Zd\n", "\n on affiche ",tmp);
-
-  mpz_mul(m_, C->c2, tmp);
-  gmp_printf ("%s %Zd\n", "\n on affiche ", m_);
-
-
 
 
 }
