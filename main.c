@@ -8,27 +8,25 @@ typedef struct {
     mpz_t beta;     // égal à alpha^d mod p, avec d clé privée
 }PubKey;
 
-mpz_t encrypt (mpz_t message, mpz_t key, PubKey bob) {
+void encrypt (mpz_t message, mpz_t key, PubKey bob) {
 
     mpz_t cleEphemere;
     mpz_init (cleEphemere);
-    mpz_powm (cleEphemere, bob->alpha, key, bob->p);
+    mpz_powm (cleEphemere, bob.alpha, key, bob.p);
 
     mpz_t cleMasquage;
     mpz_init (cleMasquage);
-    mpz_powm (cleMasquage, bob->beta, key, bob->p);
+    mpz_powm (cleMasquage, bob.beta, key, bob.p);
 
     mpz_t tmp;
     mpz_init (tmp);
     mpz_mul (tmp, message, cleMasquage);
-    mpz_t encMessage;
-    mpz_init (encMessage);
-    mpz_mod (encMessage, tmp, bob->p);
 
-    return encMessage;
+    mpz_mod (message, tmp, bob.p);
+
 }
 
-mpz_t decrypt (mpz_t encMessage, mpz_t cleEphemere, mpz_t key, mpz_t p) {
+void decrypt (mpz_t encMessage, mpz_t cleEphemere, mpz_t key, mpz_t p) {
 
     mpz_t cleMasquage;
     mpz_init (cleMasquage);
@@ -43,15 +41,40 @@ mpz_t decrypt (mpz_t encMessage, mpz_t cleEphemere, mpz_t key, mpz_t p) {
     mpz_init (tmp);
     mpz_mul (tmp, encMessage, cleMasquage);
 
-    mpz_t message;
-    mpz_init (message);
-    mpz_mod (message, tmp, p);
-
-    return message;
+    mpz_mod (encMessage, tmp, p);
 
 }
 
 int main(){
+
+    PubKey bob;
+    mpz_init(bob.p);
+    mpz_set_ui(bob.p, 8999);
+    mpz_init(bob.alpha);
+    mpz_set_ui(bob.alpha, 6426);
+    mpz_init(bob.beta);
+    mpz_t x;
+    mpz_init(x);
+    mpz_set_ui(x, 3659);
+    mpz_powm(bob.beta, bob.alpha, x, bob.p);
+
+    mpz_t message;
+    mpz_init(message);
+    mpz_set_ui(message, 123456789);
+    gmp_printf ("%s %Zd\n", "clair = ", message);
+
+    mpz_t y;
+    mpz_init(y);
+    mpz_set_ui(y, 4563);
+    encrypt(message, y, bob);
+    gmp_printf ("%s %Zd\n", "chiffre = ", message);
+
+    mpz_t cleE;
+    mpz_init (cleE);
+    mpz_powm(cleE, bob.alpha, y, bob.p);
+
+    decrypt(message, cleE, x, bob.p);
+    gmp_printf ("%s %Zd\n", "chiffre = ", message);
 
     return 0;
 }
