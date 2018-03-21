@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <gmp.h>
 
 typedef struct {
@@ -32,10 +33,9 @@ void decrypt (mpz_t encMessage, mpz_t cleEphemere, mpz_t key, mpz_t p) {
     mpz_init (cleMasquage);
     mpz_powm (cleMasquage, cleEphemere, key, p);
 
-    //Calcul de l'inverse de cleMasquage : Euclide étendu + exponentiation rapide (Square And Multiply)
     int n;
     n = mpz_invert (cleMasquage, cleMasquage, p);
-    // fin
+    if (n==0) exit(0);
 
     mpz_t tmp;
     mpz_init (tmp);
@@ -45,36 +45,61 @@ void decrypt (mpz_t encMessage, mpz_t cleEphemere, mpz_t key, mpz_t p) {
 
 }
 
-int main(){
+void keyGen(mpz_t privateKey, mpz_t p) {
 
+    unsigned long int seed = time(NULL);
+    gmp_randstate_t state;
+    gmp_randinit_default(state);
+    gmp_randseed_ui(state, seed);
+    mpz_urandomm (privateKey, state, p);
+    gmp_printf ("%s %Zd\n", "pvKey :", privateKey);
+    gmp_randclear(state);
+
+}
+
+int main(int argc, char ** args){
+
+    // Génération de la clé publique de Bob
     PubKey bob;
     mpz_init(bob.p);
     mpz_set_ui(bob.p, 8999);
     mpz_init(bob.alpha);
     mpz_set_ui(bob.alpha, 6426);
     mpz_init(bob.beta);
+
     mpz_t x;
     mpz_init(x);
-    mpz_set_ui(x, 3659);
+    keyGen(x, bob.p);
     mpz_powm(bob.beta, bob.alpha, x, bob.p);
 
+    // Chiffrement d'un message
     mpz_t message;
     mpz_init(message);
-    mpz_set_ui(message, 123456789);
+    mpz_set_ui(message, 502);
     gmp_printf ("%s %Zd\n", "clair = ", message);
 
-    mpz_t y;
+    mpz_t y;    // clé privée d'Alice
     mpz_init(y);
-    mpz_set_ui(y, 4563);
+    keyGen(y, bob.p);
     encrypt(message, y, bob);
     gmp_printf ("%s %Zd\n", "chiffre = ", message);
 
+    // Dechiffrement du message chiffré
     mpz_t cleE;
     mpz_init (cleE);
     mpz_powm(cleE, bob.alpha, y, bob.p);
 
     decrypt(message, cleE, x, bob.p);
-    gmp_printf ("%s %Zd\n", "chiffre = ", message);
+    gmp_printf ("%s %Zd\n", "clair = ", message);
+
+    mpz_clear(bob.p);
+    mpz_clear(bob.alpha);
+    mpz_clear(bob.beta);
+    mpz_clear(x);
+    mpz_clear(y);
+    mpz_clear(message);
+    mpz_clear(cleE);
 
     return 0;
+
 }
