@@ -5,35 +5,41 @@
 
 
 
-int baby_step_giant_step(int ordre,int generateur, int eltB){
+void baby_step_giant_step(mpz_t resultat,mpz_t ordre,mpz_t generateur, mpz_t eltB){
 	
 
 	
-	mpz_t m,n,g;
-	mpz_init(m);mpz_init(n);mpz_init(g); //initialisation : utile ? 
 	
+	int x;
 	
+	mpz_t resultatF;
+	mpz_init(resultatF);
 	
-
-	mpz_set_ui(n,ordre); //ordre mpz_t	
-	mpz_set_ui(g,generateur); //générateur mpz_t
-
-	
-	
-	mpz_sqrt(m,n); //initialisation de m = (racine carré(n)) + 1
-	int entier = mpz_get_ui(m)+1; // pour avoir la partie entière de m
+	mpz_t m,entier;
+	mpz_init(m);mpz_init(entier);
 	
 
 	
-	int* t = malloc(entier*sizeof(int)); //table de hachage : allouer de la mémoire de m entiers
 	
+	mpz_sqrt(m,ordre); //m = (racine carré(ordre))
+	mpz_set_ui(entier,mpz_get_ui(m)+1); //entier = partie entière (racine carré(ordre)) + 1
+	
+	
+	
+	mpz_t* t = malloc(mpz_get_ui(entier)*sizeof(mpz_t)); //table de hachage : allouer de la mémoire de m entiers
+	
+	//peut être une boucle
+	for(x=0;x<mpz_get_ui(entier);x++){
+		mpz_init(t[x]);
+	}
 	
 	
 	//==============================================================================================
 	
 	
 	int j;
-	for(j=0;j<entier;j++){ //Baby Step
+
+	for(j=0;j<mpz_get_ui(entier);j++){ //Baby Step
 		
 		
 		mpz_t res,tmp;
@@ -41,46 +47,67 @@ int baby_step_giant_step(int ordre,int generateur, int eltB){
 		mpz_set_ui(tmp,j);
 		
 	
-		mpz_powm(res,g,tmp,n); //res = alpha^j mod n 			: n = ordre du groupe et alpha = g
+		mpz_powm(res,generateur,tmp,ordre); //res = generateur^j mod ordre 			
 		
 		
-		int resultat=(int)mpz_get_ui(res);
+	
 		
-		t[j]=resultat; //stocker dans une table de hachage
+		mpz_set(t[j],res); //stocker dans une table de hachage
 	
 	}
 	
 	
-	mpz_t res1,g_inv,mpz_entier; //Calculer alpha^(-m) mod n
-	mpz_init(res1);mpz_init(g_inv);mpz_init(mpz_entier);
+	mpz_t res1,g_inv,mpz_entier,gamma; //Calculer alpha^(-m) mod n
+	mpz_init(res1);mpz_init(g_inv);mpz_init(mpz_entier),mpz_init(gamma);
 	
-	mpz_set_ui(mpz_entier,entier);
+
 	
-	int inv = mpz_invert(g_inv,g,n);
+	int inv = mpz_invert(g_inv,generateur,ordre);
+	mpz_powm(res1,g_inv,entier,ordre);
 	
-	mpz_powm(res1,g_inv,mpz_entier,n);
 	
-	int gamma=eltB;
+	mpz_set(gamma,eltB);
+
 	int i;
 	
 	
-	for(i=0;i<entier-1;i++){ //Giant Step
-		if(t[i]==gamma){
+	for(i=0;i<mpz_get_ui(entier)-1;i++){ //Giant Step
+		
+		if(mpz_cmp(t[i],gamma)==0){
 			free(t);
-			return i*entier + i;
+			mpz_mul_ui(resultatF,entier,i); // resF = entier * i
+			mpz_add_ui(resultatF,resultatF,i); // resF = (entier * i) +1
+			mpz_set(resultat,resultatF); //affectation 
+			
 			
 		}else{
-			gamma=(gamma*mpz_get_ui(res1))%ordre;
+		
+			mpz_mul(gamma,gamma,res1);
+			mpz_mod(gamma,gamma,ordre);
+			
 		}
 	}
 	
 		
 	
-	return 0; 
+	
 	}
 	
 int main (int argc, char *argv[]){
-	int a = baby_step_giant_step(11,6,10);
-	printf("a=%d \n",a); //a=5
+	
+	mpz_t a,ordre,elt;
+	mpz_init(a);mpz_init(ordre);mpz_init(elt);
+	mpz_t resultat;
+	mpz_init(resultat);
+	
+	mpz_set_ui(a,11);
+	mpz_set_ui(ordre,6);
+	mpz_set_ui(elt,10);
+	
+	baby_step_giant_step(resultat,a,ordre,elt);
+	gmp_printf("resultat=%Zd \n",resultat); //a=5
+	
+	
+	
 	return 1;
 }
