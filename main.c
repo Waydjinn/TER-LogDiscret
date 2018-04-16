@@ -92,32 +92,34 @@ void applyFunction(mpz_t x, mpz_t a, mpz_t b)
     mpz_t tmp;
     mpz_init(tmp);
     mpz_mod_ui(tmp, x, 3);
-
-    if (mpz_cmp_ui(tmp, 0) == 0)
+                            ////////////////////////////////////////////////////
+    if (mpz_cmp_ui(tmp, 0) == 0)    // x = 0 mod[3]
     {
-        mpz_pow_ui(x, x, 2);
+        mpz_pow_ui(x, x, 2);        // x = x*x mod[N]
         mpz_mod(x, x, N);
 
-        mpz_mul_ui(a, a, 2);
+        mpz_mul_ui(a, a, 2);        // a= a*2 mod[n]
         mpz_mod(a, a, n);
 
-        mpz_mul_ui(b, b, 2);
+        mpz_mul_ui(b, b, 2);        // b = b*2 mod[n]
         mpz_mod(b, b, n);
-    }
-    if (mpz_cmp_ui(tmp, 1) == 0)
+    }                       ////////////////////////////////////////////////////
+
+    if (mpz_cmp_ui(tmp, 1) == 0)    // sinon si x = 1 mod[3]
     {
-        mpz_mul(x, x, alpha);
+        mpz_mul(x, x, alpha);       // x = x*alpha mod[N]
         mpz_mod(x, x, N);
 
-        mpz_add_ui(a, a, 1);
+        mpz_add_ui(a, a, 1);        // a = a+1 mod[n]
         mpz_mod(a, a, n);
-    }
-    if (mpz_cmp_ui(tmp, 2) == 0)
+    }                          ////////////////////////////////////////////////
+
+    if (mpz_cmp_ui(tmp, 2) == 0)    // sinon, si x = 2 mod[3]
     {
-        mpz_mul(x, x, beta);
+        mpz_mul(x, x, beta);        // x= x*beta mod[N]
         mpz_mod(x, x, N);
 
-        mpz_add_ui(b, b, 1);
+        mpz_add_ui(b, b, 1);        // b = b+1 mod[n]
         mpz_mod(b, b, n);
     }
 
@@ -126,16 +128,15 @@ void applyFunction(mpz_t x, mpz_t a, mpz_t b)
 
 int main()
 {
-    mpz_init_set_str(N, "1009", 10);
+    mpz_init_set_str(N, "1019", 10);        // N est le nombre premier qui forme Z/NZ
     gmp_printf("N = %Zd\n", N);
 
     mpz_init(n);
-    mpz_sub_ui(n, N, 1);
+    mpz_sub_ui(n, N, 1);                    // n = N-1
 
-    //mpz_init_set_ui(alpha, 2);      // alpha est est générateur de G
-    mpz_init(alpha);
+    mpz_init(alpha);            // alpha est un élément générateur de Z/nZ
     findGenerator(alpha, N);
-    mpz_init_set_ui(beta, 3);       // beta est un élément de G
+    mpz_init_set_ui(beta, 5);       // beta est un élément de G (celui dont on veut résoudre le PLD)
 
     mpz_t x, X, a, A, b, B;         // Les variables majuscules vont évouluer 2X plus vite que celles en minuscules
     mpz_init_set_ui(a, 0);
@@ -145,18 +146,18 @@ int main()
     mpz_init_set_ui(x, 1);
     mpz_init_set_ui(X, 1);
 
-    mpz_t i;
+    mpz_t i;                    // i = 1
     mpz_init_set_ui(i, 1);
-    while(mpz_cmp(i, N) < 0)
+    while(mpz_cmp(i, N) < 0)        // tant que i < N
     {
-        applyFunction(x, a, b);
+        applyFunction(x, a, b);         // f(x)
         gmp_printf("x = %Zd\n", x);
 
-        applyFunction(X, A, B);
+        applyFunction(X, A, B);         // f(f(x))
         applyFunction(X, A, B);
         gmp_printf("X = %Zd\n", X);
 
-        if (mpz_cmp(x, X) == 0)
+        if (mpz_cmp(x, X) == 0)     // Si on a trouvé un cycle (x = X)
         {
             gmp_printf("x : %Zd\na : %Zd\nb : %Zd\nX : %Zd\nA : %Zd\nB : %Zd\n ", x, a, b, X, A, B);
 
@@ -165,19 +166,20 @@ int main()
             mpz_init(tmp1);
             mpz_init(tmp2);
 
-            mpz_sub(tmp1, B, b);
+            mpz_sub(tmp1, B, b);            // tmp1 = (B-b) mod[N]
             mpz_mod(tmp1, tmp1, N);
             //mpz_abs(tmp1, tmp1);
-            mpz_sub(tmp2, a, A);
+            mpz_sub(tmp2, a, A);            // tmp2 = (a-A) mod[N]
             mpz_mod(tmp2, tmp2, N);
             //mpz_abs(tmp2, tmp2);
-            if(mpz_cmp_ui(tmp1, 0) == 0)
+            if(mpz_cmp_ui(tmp1, 0) == 0)    // exception div par 0
             {
-                printf("\n\ndivision par 0 impossible\n\n");
+                printf("********** FAILURE **********\n");
+                printf("\ndivision par 0 impossible\n\n");
                 break;
             }
             gmp_printf("%Zd, %Zd\n", tmp2, tmp1);
-            mpz_cdiv_q(gamma, tmp2, tmp1);
+            mpz_cdiv_q(gamma, tmp2, tmp1);          // gamma = (a-A) / (B-b) mod[n]
             mpz_mod(gamma, gamma, n);
 
             gmp_printf("\nalpha = %Zd\n\n", alpha);
@@ -187,12 +189,12 @@ int main()
             mpz_clear(tmp1);
             mpz_clear(tmp2);
 
-            exit(0);
+            break;
         }
 
         mpz_add_ui(i, i, 1);
     }
-    printf("********** FAILURE **********\n");
+
 
     mpz_clear(x);
     mpz_clear(X);
