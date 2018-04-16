@@ -44,39 +44,39 @@ int calcul_mod(int base, int mod)
 
 void findGenerator(mpz_t gen, mpz_t n)
 {
-    mpz_t test;
+    mpz_t test;             // test sera le nombre dont on va tester si il est générateur ou non
     mpz_init_set_ui(test, 2);
 
-    while(mpz_cmp(test, n) != 0)
+    while(mpz_cmp(test, n) != 0)        // tant que test != n
     {
-        mpz_t compt;
+        mpz_t compt;                    // compt est un compteur qui s'incrémentera à chaque vérification
         mpz_init_set_ui(compt, 1);
 
-        mpz_t slow, fast;
+        mpz_t slow, fast;           // On applique l'algo de détection de Floyd, slow est la valeur prise par l'algo "lent" et fast par le "rapide"
         mpz_init_set_ui(slow, 1);
         mpz_init_set_ui(fast, 1);
 
         do
         {
-            mpz_mul(slow, slow, test);
+            mpz_mul(slow, slow, test);          // slow = (slow * test) mod [n]
             mpz_mod(slow, slow, n);
 
-            mpz_mul(fast, fast, test);
+            mpz_mul(fast, fast, test);          // fast = ((fast * test)* test) mod[n]
             mpz_mul(fast, fast, test);
             mpz_mod(fast, fast, n);
-
+                                                // compt++
             mpz_add_ui(compt, compt, 1);
-        }while (mpz_cmp(slow, fast) != 0);
+        }while (mpz_cmp(slow, fast) != 0);      // Tant qu'un cycle n'a pas été trouvé
 
-        if(mpz_cmp(compt, n) == 0)
+        if(mpz_cmp(compt, n) == 0)      // si n éléments ont été parcouru avant d'atteindre un cycle ( compt = n )
         {
             mpz_set(gen, test);
             gmp_printf("%Zd est un générateur de Z/%ZdZ\n", test, n);
             mpz_set(test, n);
         }
-        else
+        else        // Si on a atteint un cycle sans obtenir tous les éléments de Z/nZ
         {
-            mpz_add_ui(test,test,1);
+            mpz_add_ui(test,test,1);    // test++
         }
 
         mpz_clear(compt);
