@@ -3,7 +3,22 @@
 #include <gmp.h>
 
 /** On se place dans le cadre d'un groupe G fini d'ordre n, avec n+1 un nombre premier.
-Puisque n+1 est premier, un élément générateur du groupe G est 2.
+Le but de cet algo est de trouver un gamma tel que alpha^gamma = beta.
+Pour cela, on va dire que chaque nombre peut s'écrire sous la forme de alpha^a * beta^b.
+On va utiliser l'algo de détection de cycle de Floyd, c'est à dire qu'on va parcourir deux fois la boucle, dont une deux
+fois plus vite que l'autre. Ces exécutions se font en parallèles.
+l'algo va faire x = f(x) à chaque étape (ou X = f(f(x)) pour le plus rapide) et si à un moment on a x = X, alors on a un cycle et on a
+un nombre égal à x et X soit:
+
+    x = X => alpha^a * beta^b = alpha^A * beta^B
+            => alpha^(a-A) = beta^(B-b)
+
+Comme on cherche un gamma tel que alpha^gamma = beta, on obtient l'équation suivante :
+
+    alpha^(a-A) = (alpha^gamma)^(B-b)
+                = alpha^((B-b)*gamma)
+
+Il nous suffit alors de résoudre a-A = (B-b)*gamma  <=>  gamma = (a-A)/(B-b)
 
 **/
 
@@ -12,6 +27,20 @@ mpz_t N;
 mpz_t n;
 
 mpz_t alpha, beta;
+
+int calcul_mod(int base, int mod)
+{
+    int res, n;
+    n = 1;
+    res = base%mod;
+    while (res != 1 && res != mod-1)
+    {
+        res = (res*base)%mod;
+        n = n+1;
+    }
+    printf("n = %d\nres = %d", n, res);
+    return n;
+}
 
 void findGenerator(mpz_t gen, mpz_t n)
 {
@@ -97,15 +126,16 @@ void applyFunction(mpz_t x, mpz_t a, mpz_t b)
 
 int main()
 {
-    mpz_init_set_str(N, "1019", 10);
+    mpz_init_set_str(N, "1009", 10);
     gmp_printf("N = %Zd\n", N);
 
     mpz_init(n);
     mpz_sub_ui(n, N, 1);
 
     //mpz_init_set_ui(alpha, 2);      // alpha est est générateur de G
+    mpz_init(alpha);
     findGenerator(alpha, N);
-    mpz_init_set_ui(beta, 1014);       // beta est un élément de G
+    mpz_init_set_ui(beta, 3);       // beta est un élément de G
 
     mpz_t x, X, a, A, b, B;         // Les variables majuscules vont évouluer 2X plus vite que celles en minuscules
     mpz_init_set_ui(a, 0);
@@ -136,14 +166,17 @@ int main()
             mpz_init(tmp2);
 
             mpz_sub(tmp1, B, b);
-            //mpz_abs(tmp1,tmp1);
+            mpz_mod(tmp1, tmp1, N);
+            //mpz_abs(tmp1, tmp1);
             mpz_sub(tmp2, a, A);
+            mpz_mod(tmp2, tmp2, N);
             //mpz_abs(tmp2, tmp2);
             if(mpz_cmp_ui(tmp1, 0) == 0)
             {
                 printf("\n\ndivision par 0 impossible\n\n");
                 break;
             }
+            gmp_printf("%Zd, %Zd\n", tmp2, tmp1);
             mpz_cdiv_q(gamma, tmp2, tmp1);
             mpz_mod(gamma, gamma, n);
 
@@ -172,6 +205,10 @@ int main()
     mpz_clear(alpha);
     mpz_clear(beta);
     mpz_clear(i);
+
+    /*printf("\n\n\n\n");
+    int n;
+    n = calcul_mod(11, 1009);*/
 
     return 0;
 }
