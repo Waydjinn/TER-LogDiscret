@@ -1,6 +1,8 @@
 #include <gmp.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+
 
 
 
@@ -89,12 +91,11 @@ int baby_step_giant_step(mpz_t resultat,mpz_t ordre,mpz_t generateur, mpz_t eltB
 	
 	printf("Giant Step \n");
 	for(i=0;i<mpz_get_ui(entier);i++){ //Giant Step
-		printf("Pour i=%d \n",i);
-		//gmp_printf("t[%d]=%Zd compare gamma = %Zd \n",i,t[i],gamma);
+		
 		
 		for(j=0;j<mpz_get_ui(entier);j++){
 			
-			gmp_printf("Pour j=%d et t[j]=%Zd \n",j,t[j]);
+			gmp_printf("Pour i = %d Pour j=%d et t[j]=%Zd \n",i,j,t[j]);
 		
 			if(mpz_cmp(t[j],gamma)==0){
 				printf("Solution trouvée ! \n");
@@ -110,6 +111,7 @@ int baby_step_giant_step(mpz_t resultat,mpz_t ordre,mpz_t generateur, mpz_t eltB
 				mpz_clear(gamma);
 				mpz_clear(res1);
 				gmp_printf("Le résultat = %Zd \n",resultat);
+				
 				return 0;
 			}	
 		}
@@ -128,20 +130,27 @@ int baby_step_giant_step(mpz_t resultat,mpz_t ordre,mpz_t generateur, mpz_t eltB
 	
 	}
 	
+
+	
 int main (int argc, char *argv[]){
+	
+	
 	
 	mpz_t generateur,ordre,elt;
 	mpz_init(generateur);mpz_init(ordre);mpz_init(elt);
 	mpz_t resultat;
 	mpz_init(resultat);
 	
-	//
-	mpz_set_ui(generateur,2);//g=23
-	mpz_set_ui(ordre,1019);//n=53
-	mpz_set_ui(elt,5);//h=3    6¹⁰ = 60466176 mod 11 = 1
+	
+	mpz_set_ui(generateur,872052);//g=23
+	mpz_set_ui(ordre,1000667);//n=53
+	mpz_set_ui(elt,588654);//h=3    6¹⁰ = 60466176 mod 11 = 1
+	
 	
 	int g = baby_step_giant_step(resultat,ordre,generateur,elt);
-	//gmp_printf("resultat=%Zd \n",resultat); //a=5
+	
+	
+	
 	
 	
 	
