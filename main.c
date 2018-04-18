@@ -129,12 +129,13 @@ void applyFunction(mpz_t x, mpz_t a, mpz_t b)
 
 int main()
 {
-    mpz_init_set_str(N, "8243", 10);        // N est le nombre premier qui forme Z/NZ
-    mpz_init_set_str(beta, "10", 10);       // beta est un élément de G (celui dont on veut résoudre le PLD)
+    mpz_init_set_str(N, "11", 10);        // N est le nombre premier qui forme Z/NZ
+    mpz_init_set_str(beta, "", 10);       // beta est un élément de G (celui dont on veut résoudre le PLD)
 
     mpz_init(alpha);        // alpha est un élément générateur de Z/nZ
     mpz_init(ordreAlpha);
     findGenerator(alpha, N);
+    //mpz_set_ui(alpha, 6);
     calculOrdre(ordreAlpha, alpha, N);       // n = N-1
 
     mpz_t x, X, a, A, b, B;         // Les variables majuscules vont évouluer 2X plus vite que celles en minuscules
@@ -182,9 +183,11 @@ int main()
             mpz_t gamma;
             mpz_init(gamma);
 
-            mpz_div(gamma, tmp2, tmp1);
+            mpz_invert(tmp1, tmp1, N);
+            gmp_printf("inverse tmp1 : %Zd \n", tmp1);
+            mpz_mul(gamma, tmp2, tmp1);
 
-            mpz_mod(gamma, gamma, ordreAlpha);
+            mpz_mod(gamma, gamma, N);
 
             gmp_printf("\nalpha = %Zd\n\n", alpha);
             gmp_printf("\ngamma = %Zd\n\n", gamma);
