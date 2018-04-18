@@ -24,22 +24,22 @@ Il nous suffit alors de résoudre a-A = (B-b)*gamma  <=>  gamma = (a-A)/(B-b)
 
 mpz_t N;
 
-mpz_t n;
+mpz_t ordreAlpha;
 
 mpz_t alpha, beta;
 
-int calcul_mod(int base, int mod)
+void calculOrdre(mpz_t res, mpz_t base, mpz_t mod)
 {
-    int res, n;
+    int n;
     n = 1;
-    res = base%mod;
-    while (res != 1 && res != mod-1)
+    mpz_mod(res, base, mod);
+    while(mpz_cmp_ui(res, 1) != 0)
     {
-        res = (res*base)%mod;
+        mpz_mul(res, res, base);
+        mpz_mod(res, res, mod);
         n = n+1;
     }
-    printf("n = %d\nres = %d", n, res);
-    return n;
+    mpz_set_ui(res, n);
 }
 
 void findGenerator(mpz_t gen, mpz_t n)
@@ -64,15 +64,16 @@ void findGenerator(mpz_t gen, mpz_t n)
             mpz_mul(fast, fast, test);          // fast = ((fast * test)* test) mod[n]
             mpz_mul(fast, fast, test);
             mpz_mod(fast, fast, n);
-                                                // compt++
-            mpz_add_ui(compt, compt, 1);
-        }while (mpz_cmp(slow, fast) != 0);      // Tant qu'un cycle n'a pas été trouvé
+
+            mpz_add_ui(compt, compt, 1);        // compt++
+
+        }while(mpz_cmp(slow, fast) != 0);      // Tant qu'un cycle n'a pas été trouvé
 
         if(mpz_cmp(compt, n) == 0)      // si n éléments ont été parcouru avant d'atteindre un cycle ( compt = n )
         {
             mpz_set(gen, test);
-            gmp_printf("%Zd est un générateur de Z/%ZdZ\n", test, n);
-            mpz_set(test, n);
+            gmp_printf("%Zd est un generateur de Z/%ZdZ\n", test, n);
+            mpz_set(test, n);       // On casse la boucle
         }
         else        // Si on a atteint un cycle sans obtenir tous les éléments de Z/nZ
         {
@@ -99,10 +100,10 @@ void applyFunction(mpz_t x, mpz_t a, mpz_t b)
         mpz_mod(x, x, N);
 
         mpz_mul_ui(a, a, 2);        // a= a*2 mod[n]
-        mpz_mod(a, a, n);
+        mpz_mod(a, a, ordreAlpha);
 
         mpz_mul_ui(b, b, 2);        // b = b*2 mod[n]
-        mpz_mod(b, b, n);
+        mpz_mod(b, b, ordreAlpha);
     }                       ////////////////////////////////////////////////////
 
     if (mpz_cmp_ui(tmp, 1) == 0)    // sinon si x = 1 mod[3]
@@ -111,7 +112,7 @@ void applyFunction(mpz_t x, mpz_t a, mpz_t b)
         mpz_mod(x, x, N);
 
         mpz_add_ui(a, a, 1);        // a = a+1 mod[n]
-        mpz_mod(a, a, n);
+        mpz_mod(a, a, ordreAlpha);
     }                          ////////////////////////////////////////////////
 
     if (mpz_cmp_ui(tmp, 2) == 0)    // sinon, si x = 2 mod[3]
@@ -120,7 +121,7 @@ void applyFunction(mpz_t x, mpz_t a, mpz_t b)
         mpz_mod(x, x, N);
 
         mpz_add_ui(b, b, 1);        // b = b+1 mod[n]
-        mpz_mod(b, b, n);
+        mpz_mod(b, b, ordreAlpha);
     }
 
     mpz_clear(tmp);
@@ -128,15 +129,13 @@ void applyFunction(mpz_t x, mpz_t a, mpz_t b)
 
 int main()
 {
-    mpz_init_set_str(N, "1019", 10);        // N est le nombre premier qui forme Z/NZ
-    gmp_printf("N = %Zd\n", N);
+    mpz_init_set_str(N, "8243", 10);        // N est le nombre premier qui forme Z/NZ
+    mpz_init_set_str(beta, "10", 10);       // beta est un élément de G (celui dont on veut résoudre le PLD)
 
-    mpz_init(n);
-    mpz_sub_ui(n, N, 1);                    // n = N-1
-
-    mpz_init(alpha);            // alpha est un élément générateur de Z/nZ
+    mpz_init(alpha);        // alpha est un élément générateur de Z/nZ
+    mpz_init(ordreAlpha);
     findGenerator(alpha, N);
-    mpz_init_set_ui(beta, 5);       // beta est un élément de G (celui dont on veut résoudre le PLD)
+    calculOrdre(ordreAlpha, alpha, N);       // n = N-1
 
     mpz_t x, X, a, A, b, B;         // Les variables majuscules vont évouluer 2X plus vite que celles en minuscules
     mpz_init_set_ui(a, 0);
@@ -151,7 +150,7 @@ int main()
     while(mpz_cmp(i, N) < 0)        // tant que i < N
     {
         applyFunction(x, a, b);         // f(x)
-        gmp_printf("x = %Zd\n", x);
+        gmp_printf("x = %Zd,  ", x);
 
         applyFunction(X, A, B);         // f(f(x))
         applyFunction(X, A, B);
@@ -161,33 +160,36 @@ int main()
         {
             gmp_printf("x : %Zd\na : %Zd\nb : %Zd\nX : %Zd\nA : %Zd\nB : %Zd\n ", x, a, b, X, A, B);
 
-            mpz_t gamma, tmp1, tmp2;
-            mpz_init(gamma);
+            mpz_t tmp1, tmp2;
             mpz_init(tmp1);
             mpz_init(tmp2);
 
             mpz_sub(tmp1, B, b);            // tmp1 = (B-b) mod[N]
-            mpz_mod(tmp1, tmp1, N);
-            //mpz_abs(tmp1, tmp1);
-            mpz_sub(tmp2, a, A);            // tmp2 = (a-A) mod[N]
-            mpz_mod(tmp2, tmp2, N);
-            //mpz_abs(tmp2, tmp2);
+            mpz_mod(tmp1, tmp1, ordreAlpha);
+
             if(mpz_cmp_ui(tmp1, 0) == 0)    // exception div par 0
             {
                 printf("********** FAILURE **********\n");
                 printf("\ndivision par 0 impossible\n\n");
                 break;
             }
-            gmp_printf("%Zd, %Zd\n", tmp2, tmp1);
-            mpz_cdiv_q(gamma, tmp2, tmp1);          // gamma = (a-A) / (B-b) mod[n]
-            mpz_mod(gamma, gamma, n);
+
+            mpz_sub(tmp2, a, A);            // a = (a-A) mod[N]
+            mpz_mod(tmp2, tmp2, ordreAlpha);
+
+            gmp_printf("%Zd, %Zd\n", tmp1, tmp2);
+
+            mpz_t gamma;
+            mpz_init(gamma);
+
+            mpz_div(gamma, tmp2, tmp1);
+
+            mpz_mod(gamma, gamma, ordreAlpha);
 
             gmp_printf("\nalpha = %Zd\n\n", alpha);
             gmp_printf("\ngamma = %Zd\n\n", gamma);
 
             mpz_clear(gamma);
-            mpz_clear(tmp1);
-            mpz_clear(tmp2);
 
             break;
         }
@@ -195,22 +197,19 @@ int main()
         mpz_add_ui(i, i, 1);
     }
 
-
     mpz_clear(x);
     mpz_clear(X);
     mpz_clear(a);
     mpz_clear(A);
     mpz_clear(b);
     mpz_clear(B);
-    mpz_clear(n);
+    mpz_clear(ordreAlpha);
     mpz_clear(N);
     mpz_clear(alpha);
     mpz_clear(beta);
     mpz_clear(i);
 
-    /*printf("\n\n\n\n");
-    int n;
-    n = calcul_mod(11, 1009);*/
+    printf("\n\n");
 
     return 0;
 }
