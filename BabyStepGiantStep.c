@@ -5,10 +5,7 @@
 
 
 
-void baby_step_giant_step(mpz_t resultat,mpz_t ordre,mpz_t generateur, mpz_t eltB){
-	
-
-	
+void baby_step_giant_step(mpz_t resultat,mpz_t ordre,mpz_t generateur, mpz_t eltB){	
 	
 	int x;
 	
@@ -24,7 +21,7 @@ void baby_step_giant_step(mpz_t resultat,mpz_t ordre,mpz_t generateur, mpz_t elt
 	mpz_sqrt(m,ordre); //m = (racine carré(ordre))
 	mpz_set_ui(entier,mpz_get_ui(m)+1); //entier = partie entière (racine carré(ordre)) + 1
 	
-	
+	mpz_clear(m);
 	
 	mpz_t* t = malloc(mpz_get_ui(entier)*sizeof(mpz_t)); //table de hachage : allouer de la mémoire de m entiers
 	
@@ -53,9 +50,12 @@ void baby_step_giant_step(mpz_t resultat,mpz_t ordre,mpz_t generateur, mpz_t elt
 	
 		
 		mpz_set(t[j],res); //stocker dans une table de hachage
+		
+		mpz_clear(tmp);
+		mpz_clear(res);
 	
 	}
-	
+
 	
 	mpz_t res1,g_inv,mpz_entier,gamma; //Calculer alpha^(-m) mod n
 	mpz_init(res1);mpz_init(g_inv);mpz_init(mpz_entier),mpz_init(gamma);
@@ -65,6 +65,7 @@ void baby_step_giant_step(mpz_t resultat,mpz_t ordre,mpz_t generateur, mpz_t elt
 	int inv = mpz_invert(g_inv,generateur,ordre);
 	mpz_powm(res1,g_inv,entier,ordre);
 	
+	mpz_clear(g_inv);
 	
 	mpz_set(gamma,eltB);
 
@@ -78,7 +79,11 @@ void baby_step_giant_step(mpz_t resultat,mpz_t ordre,mpz_t generateur, mpz_t elt
 			mpz_mul_ui(resultatF,entier,i); // resF = entier * i
 			mpz_add_ui(resultatF,resultatF,i); // resF = (entier * i) +1
 			mpz_set(resultat,resultatF); //affectation 
-			
+			mpz_clear(resultatF);
+			mpz_clear(entier);
+			mpz_clear(gamma);
+			mpz_clear(res1);
+			break;
 			
 		}else{
 		
