@@ -28,6 +28,26 @@ mpz_t ordreAlpha;
 
 mpz_t alpha, beta;
 
+void initVars(mpz_t x, mpz_t X, mpz_t a, mpz_t A, mpz_t b, mpz_t B)
+{
+    mpz_init(x);
+    mpz_init(X);
+    mpz_init(a);
+    mpz_init(A);
+    mpz_init(b);
+    mpz_init(B);
+}
+
+void resetVars(mpz_t x, mpz_t X, mpz_t a, mpz_t A, mpz_t b, mpz_t B)
+{
+    mpz_set_ui(x, 1);
+    mpz_set_ui(X, 1);
+    mpz_set_ui(a, 0);
+    mpz_set_ui(A, 0);
+    mpz_set_ui(b, 0);
+    mpz_set_ui(B, 0);
+}
+
 void calculOrdre(mpz_t res, mpz_t base, mpz_t mod)
 {
     int n;
@@ -88,6 +108,53 @@ void findGenerator(mpz_t gen, mpz_t n)
     mpz_clear(test);
 }
 
+void findNextGenerator(mpz_t nextGen, mpz_t gen, mpz_t n)
+{
+    mpz_t test;
+    mpz_init_set(test, gen);
+    mpz_add_ui(test, gen, 1);
+
+    while(mpz_cmp(test, n) != 0)        // tant que test != n
+    {
+        mpz_t compt;                    // compt est un compteur qui s'incrémentera à chaque vérification
+        mpz_init_set_ui(compt, 1);
+
+        mpz_t slow, fast;           // On applique l'algo de détection de Floyd, slow est la valeur prise par l'algo "lent" et fast par le "rapide"
+        mpz_init_set_ui(slow, 1);
+        mpz_init_set_ui(fast, 1);
+
+        do
+        {
+            mpz_mul(slow, slow, test);          // slow = (slow * test) mod [n]
+            mpz_mod(slow, slow, n);
+
+            mpz_mul(fast, fast, test);          // fast = ((fast * test)* test) mod[n]
+            mpz_mul(fast, fast, test);
+            mpz_mod(fast, fast, n);
+
+            mpz_add_ui(compt, compt, 1);        // compt++
+
+        }while(mpz_cmp(slow, fast) != 0);      // Tant qu'un cycle n'a pas été trouvé
+
+        if(mpz_cmp(compt, n) == 0)      // si n éléments ont été parcouru avant d'atteindre un cycle ( compt = n )
+        {
+            mpz_set(nextGen, test);
+            gmp_printf("%Zd est un autre generateur de Z/%ZdZ\n", nextGen, n);
+            mpz_set(test, n);       // On casse la boucle
+        }
+        else        // Si on a atteint un cycle sans obtenir tous les éléments de Z/nZ
+        {
+            mpz_add_ui(test,test,1);    // test++
+        }
+
+        mpz_clear(compt);
+        mpz_clear(slow);
+        mpz_clear(fast);
+    }
+
+    mpz_clear(test);
+}
+
 void applyFunction(mpz_t x, mpz_t a, mpz_t b)
 {
     mpz_t tmp;
@@ -129,72 +196,84 @@ void applyFunction(mpz_t x, mpz_t a, mpz_t b)
 
 int main()
 {
-    mpz_init_set_str(N, "11", 10);        // N est le nombre premier qui forme Z/NZ
-    mpz_init_set_str(beta, "", 10);       // beta est un élément de G (celui dont on veut résoudre le PLD)
+    mpz_init_set_str(N, "1009", 10);        // N est le nombre premier qui forme Z/NZ
+    mpz_init_set_str(beta, "542", 10);       // beta est un élément de G (celui dont on veut résoudre le PLD)
 
     mpz_init(alpha);        // alpha est un élément générateur de Z/nZ
     mpz_init(ordreAlpha);
     findGenerator(alpha, N);
-    //mpz_set_ui(alpha, 6);
-    calculOrdre(ordreAlpha, alpha, N);       // n = N-1
+    calculOrdre(ordreAlpha, alpha, N);       // ordreAlpha = N-1;
 
     mpz_t x, X, a, A, b, B;         // Les variables majuscules vont évouluer 2X plus vite que celles en minuscules
-    mpz_init_set_ui(a, 0);
-    mpz_init_set_ui(b, 0);
-    mpz_init_set_ui(A, 0);
-    mpz_init_set_ui(B, 0);
-    mpz_init_set_ui(x, 1);
-    mpz_init_set_ui(X, 1);
+    initVars(x, X, a, A, b, B);        // initialise les variables x, X, a, A, b et B
+    resetVars(x, X, a, A, b, B);       // leur donne respectivement les valeurs 1, 1, 0, 0, 0, 0
 
     mpz_t i;                    // i = 1
     mpz_init_set_ui(i, 1);
+
     while(mpz_cmp(i, N) < 0)        // tant que i < N
     {
         applyFunction(x, a, b);         // f(x)
-        gmp_printf("x = %Zd,  ", x);
 
         applyFunction(X, A, B);         // f(f(x))
         applyFunction(X, A, B);
-        gmp_printf("X = %Zd\n", X);
 
         if (mpz_cmp(x, X) == 0)     // Si on a trouvé un cycle (x = X)
         {
             gmp_printf("x : %Zd\na : %Zd\nb : %Zd\nX : %Zd\nA : %Zd\nB : %Zd\n ", x, a, b, X, A, B);
 
-            mpz_t tmp1, tmp2;
+            mpz_t tmp1;
             mpz_init(tmp1);
-            mpz_init(tmp2);
-
-            mpz_sub(tmp1, B, b);            // tmp1 = (B-b) mod[N]
+            mpz_sub(tmp1, B, b);                // tmp1 = (B-b) mod[N]
             mpz_mod(tmp1, tmp1, ordreAlpha);
 
-            if(mpz_cmp_ui(tmp1, 0) == 0)    // exception div par 0
+            if(mpz_cmp_ui(tmp1, 0) == 0)        // exception div par 0 (si tmp1 = 0)
             {
-                printf("********** FAILURE **********\n");
-                printf("\ndivision par 0 impossible\n\n");
-                break;
+                mpz_set_ui(i, 0);
+                resetVars(x, X, a, A, b, B);        // On recommence l'algo avec un autre générateur (le prochain)
+                findNextGenerator(alpha, alpha, N);
             }
+            else
+            {                       // Si un potentiel gamma peut être calculé (Si on a pas de division par 0)
+                mpz_t tmp2;
+                mpz_init(tmp2);
+                mpz_sub(tmp2, a, A);            // tmp2 = (a-A) mod[N]
+                mpz_mod(tmp2, tmp2, ordreAlpha);
 
-            mpz_sub(tmp2, a, A);            // a = (a-A) mod[N]
-            mpz_mod(tmp2, tmp2, ordreAlpha);
+                gmp_printf("%Zd, %Zd\n", tmp1, tmp2);
 
-            gmp_printf("%Zd, %Zd\n", tmp1, tmp2);
+                mpz_invert(tmp1, tmp1, N);              // On calcule l'inverse de tmp1 (de B-b)
+                gmp_printf("inverse tmp1 : %Zd \n", tmp1);
 
-            mpz_t gamma;
-            mpz_init(gamma);
+                mpz_t gamma;
+                mpz_init(gamma);
+                mpz_mul(gamma, tmp2, tmp1);         // gamma = tmp2/tmp1 mod N
+                mpz_mod(gamma, gamma, N);
 
-            mpz_invert(tmp1, tmp1, N);
-            gmp_printf("inverse tmp1 : %Zd \n", tmp1);
-            mpz_mul(gamma, tmp2, tmp1);
+                mpz_clear(tmp1);
+                mpz_clear(tmp2);
 
-            mpz_mod(gamma, gamma, N);
+                mpz_t verif;            // On vérifie le résultat
+                mpz_init(verif);
+                mpz_powm(verif, alpha, gamma, N);   // vérif = alpha^gamma mod N
 
-            gmp_printf("\nalpha = %Zd\n\n", alpha);
-            gmp_printf("\ngamma = %Zd\n\n", gamma);
+                if(mpz_cmp(verif, beta) == 0)           // si on a bien verif = beta, l'algorithme est fini
+                {
+                    gmp_printf("\nalpha = %Zd\n\n", alpha);
+                    gmp_printf("\ngamma = %Zd\n\n", gamma);
 
-            mpz_clear(gamma);
+                    mpz_clear(gamma);
+                    mpz_clear(verif);
 
-            break;
+                    break;
+                }
+                else            // Si vérification fausse, on recommence l'algo avec le prochain générateur
+                {
+                    resetVars(x, X, a, A, b, B);
+                    findNextGenerator(alpha, alpha, N);
+                    mpz_set_ui(i, 0);
+                }
+            }
         }
 
         mpz_add_ui(i, i, 1);
