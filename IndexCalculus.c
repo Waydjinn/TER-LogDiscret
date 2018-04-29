@@ -3,6 +3,11 @@
 #include <stdlib.h>
 #include <time.h>
 
+void prime_pow(mpz_t resultat,int prime, int* factorBase,mpz_t elt){
+	
+		
+}
+
 void index_calculus(/*mpz_t resultat,*/ mpz_t ordre, mpz_t generateur, mpz_t elt/*, int* factorBase*/){
 	
 	mpz_t res_puissance;
