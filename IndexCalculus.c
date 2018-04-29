@@ -3,9 +3,27 @@
 #include <stdlib.h>
 #include <time.h>
 
-void prime_pow(mpz_t resultat,int prime, int* factorBase,mpz_t elt){
+//on cherche la plus grande puissance d'un nombre premier composant le nombre elt
+void prime_pow(mpz_t resultat,int prime, int* factorBase,int tailleFB, mpz_t elt){
+	mpz_t res;
+	mpz_init(res);
 	
+	int i;
+	int cmp=1;
+	
+	for(i=0;i<tailleFB;i++){ //on stock dans cmp la multiplication de tous les nombres de factorBase
 		
+		if(factorBase[i]!=prime){ //sauf pour le nbr dont on veut trouver la puissance max
+			cmp=cmp*factorBase[i];
+		}
+	
+	}
+	
+	mpz_powm_ui(res,cmp,1,ordre); //je met cmp à la puissance 1 et je lui applique le modulo ordre
+	
+	//donc dans le mpz_t res j'ai récupérer un nombre prime à la puissance x (le x que je cherche)
+	
+	
 }
 
 void index_calculus(/*mpz_t resultat,*/ mpz_t ordre, mpz_t generateur, mpz_t elt/*, int* factorBase*/){
