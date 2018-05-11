@@ -61,20 +61,21 @@ i++;
 gmp_printf("Le résultat est %d. Pour ln(%Zlf)=%Zlf.\n",i,ordre,res);
 }*/
 
-/*void recherche_exhaustive_log_INT(mpz_t ordre){
+void recherche_exhaustive_log_INT(mpz_t ordre){
 
     int i=0;
 
     double res;
     res = mpz_get_d(ordre);
 
-    printf("%lf\n", );
-
     log(res);
+    printf("Log est %lf\n", res);
+
+    
 
     //log(5675675);
 
-}*/
+}
 
 
 
@@ -152,9 +153,11 @@ mpz_set_ui(generateur,3);
 mpz_set_ui(ordre,1217);
 mpz_set_ui(elt,37);
 
-index_calculus(ordre,generateur);
+//index_calculus(ordre,generateur);
 
 //decomposition(ordre);
+
+recherche_exhaustive_log_INT(ordre);
 
 return 0;
 }

@@ -1,0 +1,20 @@
+exp( ( (sqrt(2)/2) + 1 )  *  pow( (  log( log(n) ) * log(n) ), 0.5 ) )
+
+Avec p= 83  : 
+Attendu : ~4 ou 7
+	Pour o(1) = 0 :
+		ln -> 6.1219
+		log10 -> 1.6840
+	Pour o(1) = 1 :
+		ln -> 79.3823
+		log10 -> 3.5193
+
+Avec p=1217 :
+Attendu : ~8 ou 19
+	Pour o(1) = 0 :
+		ln -> 13.9996
+		log10 -> 2.3840
+	Pour o(1) = 1 :
+		ln -> 584.7463
+		log10 -> 8.1455
+
