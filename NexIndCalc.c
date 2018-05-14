@@ -88,6 +88,11 @@ void primeFactDecomp(PrimeFact* P, mpz_t n)      // décomposition de n en facte
     }
 }
 
+void putInMatrix(PrimeFact* P, mpz_t* FactorBase, mpz_t tailleFBase)
+{
+
+}
+
 int testInFactorBase(PrimeFact* P, mpz_t* FactorBase, mpz_t tailleFBase)
 {
     /* AMELIORABLE ************************ */
@@ -97,6 +102,7 @@ int testInFactorBase(PrimeFact* P, mpz_t* FactorBase, mpz_t tailleFBase)
     //Parcours de tous les premiers de la décomposition
     int i=0;
     int j=0;
+
     while(mpz_cmp_ui(P[i].prime, 1) != 0)
     {
         //gmp_printf("Facteur : %Zd\nPuissance : %Zd\n\n", P[i].prime, P[i].pow);
@@ -114,6 +120,12 @@ int testInFactorBase(PrimeFact* P, mpz_t* FactorBase, mpz_t tailleFBase)
             //if( mpz_cmp(mpz_get_ui(P[i].prime), mpz_get_ui(FactorBase[j]) ) == 0)
             if( mpz_cmp(P[i].prime, FactorBase[j] ) == 0)
             {
+                //S'il n'y a qu'un seul prime dans la décomposition, on prévient avec un 2.
+                if(mpz_cmp_ui(P[1].prime, 1) == 0)
+                {
+                   return 2; 
+                }
+
                 dernPos=j; break; //On retient la position
             }   
         }
@@ -135,6 +147,33 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
     mpz_powm_ui(res_puissance,generateur,i,ordre);
     gmp_printf("%Zd ^(%d) = %Zd \n",generateur,i,res_puissance);
     }*/
+
+    /* Création matrice ******************************* */
+    mpz_t* FactorBase = malloc(mpz_get_ui(tailleFBase)*sizeof(mpz_t));
+
+    int x;
+    for(x=0; x<mpz_get_ui(tailleFBase); x++) //Init
+    {
+        mpz_init(FactorBase[x]);
+    }
+
+    mpz_t prime;
+    mpz_init(prime);
+    mpz_set_ui(prime,2);
+
+    for(x=0; x<mpz_get_ui(tailleFBase); x++) //
+    {
+        mpz_set(FactorBase[x], prime);
+        mpz_nextprime (prime, prime);
+    }
+
+    gmp_printf("Factor base : ", FactorBase[x]);
+    for(x=0; x<mpz_get_ui(tailleFBase); x++) //
+    {
+        gmp_printf("%Zd, ", FactorBase[x]);
+    }
+    printf("\n");
+
 
     /* 1. Factor base Init ******************************* */
     /* On veut avoir tous les nombres premiers de 2 à celui correspondant à 
@@ -163,7 +202,7 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
     {
         gmp_printf("%Zd, ", FactorBase[x]);
     }
-    printf("\n\n");
+    printf("\n");
 
     /* 2. Calcul des équations  ************************************* */
     /* On calcule maintenant plein de g^k mod p. 
@@ -192,7 +231,8 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
         k++;
     }
 
-    while(cnt < mpz_get_ui(tailleFBase))
+    //while(cnt < mpz_get_ui(tailleFBase))
+    while(cnt < 40)
     {
         mpz_powm_ui (resPowm, generateur, k, ordre);
         
@@ -207,6 +247,13 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
              gmp_printf("\nN°: %d - k : %d Nombre : %Zd\n", cnt, k, resPowm);
              affiche(P);
         }
+        else if (test == 2)
+        {
+            printf("Un seul facteur !");
+            cnt++;
+            gmp_printf("\nN°: %d - k : %d Nombre : %Zd\n", cnt, k, resPowm);
+            affiche(P);
+        }
         else if (test == -1)
         {
             //printf("Nope\n");
@@ -215,6 +262,10 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
         k++;
        
     }
+
+
+
+
 
     free(FactorBase);
 
@@ -353,10 +404,17 @@ int main(int argc, char **argv)
     mpz_t generateur,ordre,elt,tailleFBase;
     mpz_init(generateur);mpz_init(ordre);mpz_init(elt);mpz_init(tailleFBase);
 
-    mpz_set_ui(generateur,3);
+    //Example "rouge"
+   /* mpz_set_ui(generateur,3);
     mpz_set_ui(ordre,1217);
     mpz_set_ui(elt,37);
-    mpz_set_ui(tailleFBase, 8);//HARDCODé ICI POUR L'INSTANT
+    mpz_set_ui(tailleFBase, 8);//HARDCODé ICI POUR L'INSTANT*/
+
+    //Exemple "bleu"
+    mpz_set_ui(generateur,2);
+    mpz_set_ui(ordre,83);
+    mpz_set_ui(elt,31);
+    mpz_set_ui(tailleFBase, 4);//HARDCODé ICI POUR L'INSTANT
 
     
 
