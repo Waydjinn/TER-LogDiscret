@@ -166,32 +166,56 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
     gmp_printf("%Zd ^(%d) = %Zd \n",generateur,i,res_puissance);
     }*/
 
-   /*  Création matrice ******************************* */
-   /*mpz_t* FactorBase = malloc(mpz_get_ui(tailleFBase)*sizeof(mpz_t));
+    /*  Création matrice carrée ******************************* */
+    //On alloue la mémoire
+    mpz_t** matriceCarree = malloc(mpz_get_ui(tailleFBase)*sizeof(mpz_t));
+    int y;
+    int h;
 
+    //Là aussi
+    for (y = 0 ; y < mpz_get_ui(tailleFBase) ; y++)
+    {
+        matriceCarree[y] = malloc(mpz_get_ui(tailleFBase) * sizeof(mpz_t));
+    }
+
+    //On l'initialise
+    for(y=0; y<mpz_get_ui(tailleFBase); y++) //Init
+    {
+       for (h = 0 ; h < mpz_get_ui(tailleFBase) ; h++)
+        {
+            mpz_init(matriceCarree[y][h]);
+        }
+    }
+
+    gmp_printf("Matrice carrée : \n");
+
+    for(y=0; y<mpz_get_ui(tailleFBase); y++) //Init
+    {
+       for (h = 0 ; h < mpz_get_ui(tailleFBase) ; h++)
+        {
+            gmp_printf("%Zd ", matriceCarree[y][h]);
+        }
+        gmp_printf("\n");
+    }
+
+    /*  Création tableau résultat ******************************* */
     int x;
-    for(x=0; x<mpz_get_ui(tailleFBase); x++) //Init
-    {
-        mpz_init(FactorBase[x]);
+
+    //On alloue la mémoire
+    mpz_t* tableauResultat = malloc(mpz_get_ui(tailleFBase)*sizeof(mpz_t));
+
+    //On l'initialise
+    for(x=0; x<mpz_get_ui(tailleFBase); x++)
+    { 
+        mpz_init(tableauResultat[x]);
     }
 
-    mpz_t prime;
-    mpz_init(prime);
-    mpz_set_ui(prime,2);
-
-    for(x=0; x<mpz_get_ui(tailleFBase); x++) //
+    gmp_printf("Tableau résultat : \n");
+    for(x=0; x<mpz_get_ui(tailleFBase); x++) 
     {
-        mpz_set(FactorBase[x], prime);
-        mpz_nextprime (prime, prime);
+        gmp_printf("%Zd ", tableauResultat[x]);
     }
-
-    gmp_printf("Factor base : ", FactorBase[x]);
-    for(x=0; x<mpz_get_ui(tailleFBase); x++) //
-    {
-        gmp_printf("%Zd, ", FactorBase[x]);
-    }
-    printf("\n");*/
-
+    printf("\n");
 
     /* 1. Factor base Init ******************************* 
      On veut avoir tous les nombres premiers de 2 à celui correspondant à 
@@ -199,7 +223,7 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
 
     mpz_t* FactorBase = malloc(mpz_get_ui(tailleFBase)*sizeof(mpz_t));
 
-    int x;
+    
     for(x=0; x<mpz_get_ui(tailleFBase); x++) //Init
     {
         mpz_init(FactorBase[x]);
@@ -253,26 +277,34 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
     mpz_init(primeVoulu);
     mpz_set_ui(primeVoulu,2);
 
+    //Tant qu'on a pas atteint le nombre d'équations testées voulu, on boucle
     //while(cnt < mpz_get_ui(tailleFBase))
     while(cnt < 40)
     {
+        //On calcule generateur^k
         mpz_powm_ui (resPowm, generateur, k, ordre);
-        
-        primeFactDecomp(P, resPowm);
-        
 
+        //On le décompose en facteurs premiers
+        primeFactDecomp(P, resPowm);
+
+        //Et on donne cette décomposition à une fonction qui va nous dire si ces éléments \
+        de cette décomposition sont bien tous dans le factor base. \
+        Elle nous dira aussi si le prime voulu est dans cette équation (sinon on la drop).
         test = testInFactorBase(P, FactorBase, tailleFBase, primeVoulu);
+
+        //Si tous les éléments sont bien dans la FactorBase et que notre prime voulu y\
+        est aussi, alors :
         if (test == 11)
         {
             //printf("-> Dans la FBase !!\n");
-            printf("-> Sélectionnée !\n");
+            //printf("-> Sélectionnée !\n");
              cnt++;
              gmp_printf("\nN°: %d - k : %d Nombre : %Zd\n", cnt, k, resPowm);
              affiche(P);
 
              mpz_nextprime (primeVoulu, primeVoulu);
 
-             gmp_printf("test %Zd" , FactorBase[mpz_get_ui(tailleFBase)-1]);
+             //gmp_printf("test %Zd" , FactorBase[mpz_get_ui(tailleFBase)-1]);
 
              if(mpz_cmp(primeVoulu, FactorBase[mpz_get_ui(tailleFBase)-1]) > 0)
              {
