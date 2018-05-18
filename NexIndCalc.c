@@ -90,7 +90,15 @@ void primeFactDecomp(PrimeFact* P, mpz_t n)      // décomposition de n en facte
 
 void putInMatrix(PrimeFact* P, mpz_t* FactorBase, mpz_t tailleFBase)
 {
+    //On parcours tous les éléments de la décomposition.\
+    Pour chaque prime, ...
+    /*while(mpz_cmp_ui(P[i].prime, 1) != 0)
+    {
 
+
+        
+        i++;
+    }*/
 }
 
 int testInFactorBase(PrimeFact* P, mpz_t* FactorBase, mpz_t tailleFBase, mpz_t primeVoulu)
@@ -140,9 +148,16 @@ int testInFactorBase(PrimeFact* P, mpz_t* FactorBase, mpz_t tailleFBase, mpz_t p
         i++;
     }
 
-    //Si on arrive ici, tous les nombres sont bien dans la FBase
+    //Si on arrive ici, tous les nombres sont bien dans la FBase...
+
+    //et le prime voulu est bien dans la FBase
     if(primeVouluOK == 0)
     {
+
+
+
+
+
         return 11;
     }
     else if(primeVouluOK == -1)
@@ -298,13 +313,44 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
         {
             //printf("-> Dans la FBase !!\n");
             //printf("-> Sélectionnée !\n");
-             cnt++;
+             
              gmp_printf("\nN°: %d - k : %d Nombre : %Zd\n", cnt, k, resPowm);
              affiche(P);
+
+             int curseurPrime = 0;
+             int curseurMCetFB = 0;
+             printf("test\n");
+             //On va la mettre dans la matrice carrée. On la parcours (ainsi que FBase)
+             for (curseurMCetFB = 0; curseurMCetFB < mpz_get_ui(tailleFBase); curseurMCetFB++)
+             {
+                //gmp_printf("test2 cnt=%d\n", cnt);
+                gmp_printf("curseurPrime = %d, curseurMCetFB = %d, FactorBase[] = %Zd, P[] =  %Zd, matriceCarree[] = %Zd\n", \
+                    curseurPrime, curseurMCetFB, FactorBase[curseurMCetFB], P[curseurPrime].prime, matriceCarree[cnt][curseurMCetFB]);
+
+                //printf("test3\n");
+                //si la colonne correspond bien au prime de la décomposition current
+                if(mpz_cmp(FactorBase[curseurMCetFB], P[curseurPrime].prime) == 0)
+                {
+                    mpz_set(matriceCarree[cnt][curseurMCetFB], P[curseurPrime].pow);  
+                    curseurPrime++;
+                    //curseurMCetFB++;
+                }
+                else
+                {
+                    mpz_set_ui(matriceCarree[cnt][curseurMCetFB], 0);
+                    //curseurMCetFB++;
+                }
+
+             }
+
+
+
+
 
              mpz_nextprime (primeVoulu, primeVoulu);
 
              //gmp_printf("test %Zd" , FactorBase[mpz_get_ui(tailleFBase)-1]);
+             cnt++;
 
              if(mpz_cmp(primeVoulu, FactorBase[mpz_get_ui(tailleFBase)-1]) > 0)
              {
@@ -333,7 +379,16 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
 
 
 
+gmp_printf("Matrice carrée : \n");
 
+    for(y=0; y<mpz_get_ui(tailleFBase); y++) //Init
+    {
+       for (h = 0 ; h < mpz_get_ui(tailleFBase) ; h++)
+        {
+            gmp_printf("%Zd ", matriceCarree[y][h]);
+        }
+        gmp_printf("\n");
+    }
 
     free(FactorBase);
 
