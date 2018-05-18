@@ -148,8 +148,8 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
     gmp_printf("%Zd ^(%d) = %Zd \n",generateur,i,res_puissance);
     }*/
 
-    /* Création matrice ******************************* */
-    mpz_t* FactorBase = malloc(mpz_get_ui(tailleFBase)*sizeof(mpz_t));
+   /*  Création matrice ******************************* */
+   mpz_t* FactorBase = malloc(mpz_get_ui(tailleFBase)*sizeof(mpz_t));
 
     int x;
     for(x=0; x<mpz_get_ui(tailleFBase); x++) //Init
@@ -175,8 +175,8 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
     printf("\n");
 
 
-    /* 1. Factor base Init ******************************* */
-    /* On veut avoir tous les nombres premiers de 2 à celui correspondant à 
+    /* 1. Factor base Init ******************************* 
+     On veut avoir tous les nombres premiers de 2 à celui correspondant à 
     la taille du FBase, pour comparer par la suite plus simplement. */
 
     mpz_t* FactorBase = malloc(mpz_get_ui(tailleFBase)*sizeof(mpz_t));
@@ -232,7 +232,7 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
     }
 
     //while(cnt < mpz_get_ui(tailleFBase))
-    while(cnt < 40)
+    while(cnt < 4)
     {
         mpz_powm_ui (resPowm, generateur, k, ordre);
         
