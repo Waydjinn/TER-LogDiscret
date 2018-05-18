@@ -93,7 +93,7 @@ void putInMatrix(PrimeFact* P, mpz_t* FactorBase, mpz_t tailleFBase)
 
 }
 
-int testInFactorBase(PrimeFact* P, mpz_t* FactorBase, mpz_t tailleFBase)
+int testInFactorBase(PrimeFact* P, mpz_t* FactorBase, mpz_t tailleFBase, mpz_t primeVoulu)
 {
     /* AMELIORABLE ************************ */
 
@@ -103,9 +103,16 @@ int testInFactorBase(PrimeFact* P, mpz_t* FactorBase, mpz_t tailleFBase)
     int i=0;
     int j=0;
 
+    int primeVouluOK = -1;
+
     while(mpz_cmp_ui(P[i].prime, 1) != 0)
     {
         //gmp_printf("Facteur : %Zd\nPuissance : %Zd\n\n", P[i].prime, P[i].pow);
+
+        if(mpz_cmp(P[i].prime, primeVoulu) == 0)
+        {
+            primeVouluOK = 0;
+        }
         
         //On parcours la Factor Base (à partir de la dernière position repérée)
         for (j = dernPos; j <= mpz_get_ui(tailleFBase); j++)
@@ -132,7 +139,18 @@ int testInFactorBase(PrimeFact* P, mpz_t* FactorBase, mpz_t tailleFBase)
 
         i++;
     }
-    return 0; //Si on arrive ici, tous les nombres sont bien dans la FBase
+
+    //Si on arrive ici, tous les nombres sont bien dans la FBase
+    if(primeVouluOK == 0)
+    {
+        return 11;
+    }
+    else if(primeVouluOK == -1)
+    {
+        return 22;
+    }
+
+     
 }
 
 
@@ -149,7 +167,7 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
     }*/
 
    /*  Création matrice ******************************* */
-   mpz_t* FactorBase = malloc(mpz_get_ui(tailleFBase)*sizeof(mpz_t));
+   /*mpz_t* FactorBase = malloc(mpz_get_ui(tailleFBase)*sizeof(mpz_t));
 
     int x;
     for(x=0; x<mpz_get_ui(tailleFBase); x++) //Init
@@ -172,7 +190,7 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
     {
         gmp_printf("%Zd, ", FactorBase[x]);
     }
-    printf("\n");
+    printf("\n");*/
 
 
     /* 1. Factor base Init ******************************* 
@@ -231,29 +249,47 @@ void index_calculus(mpz_t ordre, mpz_t generateur, mpz_t elt, mpz_t tailleFBase)
         k++;
     }
 
+    mpz_t primeVoulu;
+    mpz_init(primeVoulu);
+    mpz_set_ui(primeVoulu,2);
+
     //while(cnt < mpz_get_ui(tailleFBase))
-    while(cnt < 4)
+    while(cnt < 40)
     {
         mpz_powm_ui (resPowm, generateur, k, ordre);
         
         primeFactDecomp(P, resPowm);
         
 
-        test = testInFactorBase(P, FactorBase, tailleFBase);
-        if (test == 0)
+        test = testInFactorBase(P, FactorBase, tailleFBase, primeVoulu);
+        if (test == 11)
         {
             //printf("-> Dans la FBase !!\n");
+            printf("-> Sélectionnée !\n");
              cnt++;
              gmp_printf("\nN°: %d - k : %d Nombre : %Zd\n", cnt, k, resPowm);
              affiche(P);
+
+             mpz_nextprime (primeVoulu, primeVoulu);
+
+             gmp_printf("test %Zd" , FactorBase[mpz_get_ui(tailleFBase)-1]);
+
+             if(mpz_cmp(primeVoulu, FactorBase[mpz_get_ui(tailleFBase)-1]) > 0)
+             {
+                cnt = 40;
+             }
         }
-        else if (test == 2)
+        else if (test == 22)
+        {
+            //printf("Nope\n");
+        }
+        /*else if (test == 2)
         {
             printf("Un seul facteur !");
             cnt++;
             gmp_printf("\nN°: %d - k : %d Nombre : %Zd\n", cnt, k, resPowm);
             affiche(P);
-        }
+        }*/
         else if (test == -1)
         {
             //printf("Nope\n");
